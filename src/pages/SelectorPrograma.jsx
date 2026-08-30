@@ -1,0 +1,131 @@
+import { useNavigate } from 'react-router-dom'
+import AppLayout from '../components/AppLayout.jsx'
+
+const PROGRAMAS = [
+  {
+    clave: 'DCC',
+    nombre: 'Doctorado en Ciencias de la Computación',
+    alumnosInscritos: 42,
+  },
+  {
+    clave: 'DGTI',
+    nombre: 'Doctorado en Gestión de Tecnologías de la Información',
+    alumnosInscritos: 28,
+  },
+  {
+    clave: 'MCC',
+    nombre: 'Maestría en Ciencias de la Computación',
+    alumnosInscritos: 56,
+  },
+  {
+    clave: 'MTAC',
+    nombre: 'Maestría en Tecnologías para el Aprendizaje y el Conocimiento',
+    alumnosInscritos: 34,
+    centered: true,
+  },
+  {
+    clave: 'MATI',
+    nombre: 'Maestría en Administración de Tecnologías de la Información',
+    alumnosInscritos: 89,
+    centered: true,
+  },
+]
+
+function ProgramaCard({ programa }) {
+  const navigate = useNavigate()
+
+  return (
+    <button
+      className={`neumorphic-elevated neumorphic-elevated-hover rounded-xl p-card-padding flex flex-col items-center text-center gap-4 group w-full ${
+        programa.centered ? 'max-w-[360px]' : ''
+      }`}
+      type="button"
+      onClick={() => navigate(`/programas/${programa.clave}`)}
+    >
+      <div className="w-20 h-20 rounded-full neumorphic-elevated flex items-center justify-center text-primary group-hover:text-primary-container transition-colors">
+        <span className="text-headline-md font-bold">{programa.clave}</span>
+      </div>
+      <div>
+        <h2 className="text-headline-md font-headline-md font-semibold text-on-background mb-2">
+          {programa.nombre}
+        </h2>
+        <span className="inline-flex items-center rounded-full bg-surface-container px-3 py-1 text-label-sm font-label-sm font-semibold text-on-surface-variant">
+          <span className="w-2 h-2 rounded-full bg-primary mr-2"></span>
+          {programa.alumnosInscritos} Alumnos Inscritos
+        </span>
+      </div>
+    </button>
+  )
+}
+
+export default function SelectorPrograma() {
+  const gridCards = PROGRAMAS.filter((programa) => !programa.centered)
+  const centeredCards = PROGRAMAS.filter((programa) => programa.centered)
+
+  return (
+    <AppLayout>
+      <div className="max-w-[1440px] mx-auto min-h-full flex flex-col gap-12">
+        <header className="text-center mb-8">
+          <h1 className="text-display-lg font-display-lg font-bold text-on-background mb-4">
+            DACYTI
+          </h1>
+          <p className="text-body-lg font-body-lg text-on-surface-variant max-w-2xl mx-auto">
+            Elige el programa de postgrado para acceder a los expedientes y reportes correspondientes.
+          </p>
+        </header>
+        {/* Bento Grid for Programs */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {gridCards.map((programa) => (
+            <ProgramaCard key={programa.clave} programa={programa} />
+          ))}
+        </div>
+        {/* Centered Maestría row */}
+        <div className="flex flex-col sm:flex-row justify-center gap-8">
+          {centeredCards.map((programa) => (
+            <ProgramaCard key={programa.clave} programa={programa} />
+          ))}
+        </div>
+        {/* Full width action bar */}
+        <div className="mt-8">
+          <button
+            className="w-full neumorphic-elevated neumorphic-elevated-hover rounded-xl py-6 px-8 flex items-center justify-center gap-4 group"
+            type="button"
+          >
+            <span className="material-symbols-outlined text-primary group-hover:text-primary-container transition-colors">
+              group
+            </span>
+            <span className="text-headline-md font-headline-md text-on-background font-semibold">
+              Ver todos los alumnos inscritos
+            </span>
+          </button>
+        </div>
+        {/* Footer */}
+        <footer className="w-full py-8 mt-auto flex flex-col md:flex-row justify-between items-center border-t border-outline-variant/10">
+          <span className="text-label-sm font-bold text-on-surface">
+            © 2024 University Administration System. Version 2.4.0-stable
+          </span>
+          <div className="flex gap-element-gap mt-4 md:mt-0">
+            <a
+              className="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim text-label-sm font-label-sm font-semibold"
+              href="#"
+            >
+              Privacidad
+            </a>
+            <a
+              className="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim text-label-sm font-label-sm font-semibold"
+              href="#"
+            >
+              Soporte
+            </a>
+            <a
+              className="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim text-label-sm font-label-sm font-semibold"
+              href="#"
+            >
+              Manual de Usuario
+            </a>
+          </div>
+        </footer>
+      </div>
+    </AppLayout>
+  )
+}

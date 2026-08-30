@@ -1,0 +1,193 @@
+@import "tailwindcss";
+
+/* Modo oscuro por clase (como en el HTML original: tailwind.config darkMode: "class") */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ============================================================
+   Tokens del sistema de diseño "Academic Soft UI"
+   Fuente: stitch-export/academic_soft_ui/DESIGN.md + config
+   tailwind que viajaba en los code.html
+   ============================================================ */
+@theme {
+  /* Colores */
+  --color-surface: #f6f9ff;
+  --color-surface-dim: #d5dae1;
+  --color-surface-bright: #f6f9ff;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #eff4fb;
+  --color-surface-container: #e9eef5;
+  --color-surface-container-high: #e4e9f0;
+  --color-surface-container-highest: #dee3ea;
+  --color-on-surface: #171c21;
+  --color-on-surface-variant: #404751;
+  --color-inverse-surface: #2b3136;
+  --color-inverse-on-surface: #ecf1f8;
+  --color-outline: #707882;
+  --color-outline-variant: #bfc7d3;
+  --color-surface-tint: #00629f;
+  --color-primary: #00629f;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #4facfe;
+  --color-on-primary-container: #003e68;
+  --color-inverse-primary: #9bcbff;
+  --color-secondary: #436180;
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #bcdaff;
+  --color-on-secondary-container: #42607f;
+  --color-tertiary: #7e5700;
+  --color-on-tertiary: #ffffff;
+  --color-tertiary-container: #dc9a00;
+  --color-on-tertiary-container: #523700;
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
+  --color-error-container: #ffdad6;
+  --color-on-error-container: #93000a;
+  --color-primary-fixed: #d0e4ff;
+  --color-primary-fixed-dim: #9bcbff;
+  --color-on-primary-fixed: #001d34;
+  --color-on-primary-fixed-variant: #004a7a;
+  --color-secondary-fixed: #d0e4ff;
+  --color-secondary-fixed-dim: #abc9ed;
+  --color-on-secondary-fixed: #001d34;
+  --color-on-secondary-fixed-variant: #2b4967;
+  --color-tertiary-fixed: #ffdeac;
+  --color-tertiary-fixed-dim: #ffba38;
+  --color-on-tertiary-fixed: #281900;
+  --color-on-tertiary-fixed-variant: #604100;
+  --color-background: #f6f9ff;
+  --color-on-background: #171c21;
+  --color-surface-variant: #dee3ea;
+
+  /* Radios (los que usan las pantallas reales de Stitch) */
+  --radius-DEFAULT: 0.25rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-full: 9999px;
+
+  /* Espaciado */
+  --spacing-base: 8px;
+  --spacing-gutter: 24px;
+  --spacing-card-padding: 24px;
+  --spacing-container-margin: 32px;
+  --spacing-element-gap: 16px;
+
+  /* Tipografía */
+  --font-display-lg: "Inter", sans-serif;
+  --font-headline-lg: "Inter", sans-serif;
+  --font-headline-md: "Inter", sans-serif;
+  --font-headline-lg-mobile: "Inter", sans-serif;
+  --font-body-lg: "Inter", sans-serif;
+  --font-body-md: "Inter", sans-serif;
+  --font-label-md: "Inter", sans-serif;
+  --font-label-sm: "Inter", sans-serif;
+
+  --text-display-lg: 48px;
+  --text-display-lg--line-height: 56px;
+  --text-display-lg--letter-spacing: -0.02em;
+
+  --text-headline-lg: 32px;
+  --text-headline-lg--line-height: 40px;
+  --text-headline-lg--letter-spacing: -0.01em;
+
+  --text-headline-md: 24px;
+  --text-headline-md--line-height: 32px;
+
+  --text-headline-lg-mobile: 28px;
+  --text-headline-lg-mobile--line-height: 36px;
+
+  --text-body-lg: 18px;
+  --text-body-lg--line-height: 28px;
+
+  --text-body-md: 16px;
+  --text-body-md--line-height: 24px;
+
+  --text-label-md: 14px;
+  --text-label-md--line-height: 20px;
+  --text-label-md--letter-spacing: 0.01em;
+
+  --text-label-sm: 12px;
+  --text-label-sm--line-height: 16px;
+  --text-label-sm--letter-spacing: 0.05em;
+}
+
+/* ============================================================
+   Clases neumórficas compartidas (extraídas de los code.html)
+   ============================================================ */
+.neumorphic-elevated {
+  box-shadow: 9px 9px 16px rgba(163, 177, 198, 0.6), -9px -9px 16px rgba(255, 255, 255, 0.5);
+}
+
+.neumorphic-sunken {
+  box-shadow: inset 6px 6px 12px #a3b1c6, inset -6px -6px 12px #ffffff;
+}
+
+.neumorphic-elevated-hover {
+  transition: all 0.3s ease;
+}
+.neumorphic-elevated-hover:hover {
+  box-shadow: inset 6px 6px 12px #a3b1c6, inset -6px -6px 12px #ffffff;
+  transform: scale(0.98);
+}
+
+.neumorphic-button:active {
+  box-shadow: inset 6px 6px 12px #a3b1c6, inset -6px -6px 12px #ffffff;
+}
+
+.btn-active:active {
+  box-shadow: inset 6px 6px 12px #a3b1c6, inset -6px -6px 12px #ffffff;
+}
+
+.primary-glow {
+  box-shadow: 9px 9px 16px rgba(163, 177, 198, 0.6), -9px -9px 16px rgba(255, 255, 255, 0.5), inset 2px 2px 4px rgba(255, 255, 255, 0.4);
+}
+
+.pill-green {
+  background: linear-gradient(135deg, #e6f4ea, #ceebd5);
+  color: #137333;
+  box-shadow: 2px 2px 5px rgba(163, 177, 198, 0.4), -2px -2px 5px rgba(255, 255, 255, 0.7);
+}
+
+.pill-amber {
+  background: linear-gradient(135deg, #fef7e0, #fce8b2);
+  color: #b06000;
+  box-shadow: 2px 2px 5px rgba(163, 177, 198, 0.4), -2px -2px 5px rgba(255, 255, 255, 0.7);
+}
+
+.pill-grey {
+  background: linear-gradient(135deg, #f1f3f4, #e8eaed);
+  color: #5f6368;
+  box-shadow: inset 2px 2px 4px #d1d9e6, inset -2px -2px 4px #ffffff;
+}
+
+/* Badges de programa del dashboard (mockup_neumorfismo.html) */
+.pill-doc {
+  background: #e4e9f9;
+  color: #5b7fdb;
+  box-shadow: 2px 2px 5px rgba(163, 177, 198, 0.4), -2px -2px 5px rgba(255, 255, 255, 0.7);
+}
+
+.pill-mae {
+  background: #eee7fb;
+  color: #7a56c9;
+  box-shadow: 2px 2px 5px rgba(163, 177, 198, 0.4), -2px -2px 5px rgba(255, 255, 255, 0.7);
+}
+
+.expandable-content {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s ease-in-out;
+}
+.expandable-content.expanded {
+  grid-template-rows: 1fr;
+}
+.expandable-content > div {
+  overflow: hidden;
+}
+
+/* Barra de navegación superior (sombra neumórfica de los code.html) */
+.top-navbar {
+  box-shadow: 9px 9px 16px rgba(163, 177, 198, 0.6), -9px -9px 16px rgba(255, 255, 255, 0.5);
+}
+.dark .top-navbar {
+  box-shadow: 9px 9px 16px #1d2122, -9px -9px 16px #3d4648;
+}
