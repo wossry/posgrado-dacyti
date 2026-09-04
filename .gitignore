@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+# Bases de datos locales
+posgrados
+posgrados-backup
