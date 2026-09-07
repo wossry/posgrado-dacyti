@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import AppLayout from '../components/AppLayout.jsx'
 
@@ -10,32 +10,133 @@ const NOMBRE_PROGRAMA = {
   MATI: 'Maestría en Administración de Tecnologías de Información',
 }
 
-const ESTUDIANTES = [
-  {
-    matricula: 'A01234567',
-    nombre: 'María Rodríguez Pérez',
-    iniciales: 'MR',
-    semestre: '3er Semestre',
-    completo: true,
-  },
-  {
-    matricula: 'A09876543',
-    nombre: 'Juan Gómez Silva',
-    iniciales: 'JG',
-    semestre: '1er Semestre',
-    completo: false,
-  },
-]
+
 
 function TarjetaEstudiante({ estudiante }) {
   const [expanded, setExpanded] = useState(false)
+  const [expediente, setExpediente] = useState(null)
+  const [cargando, setCargando] = useState(false)
+  const [error, setError] = useState('')
+  const [completo, setCompleto] = useState(false)
+    const cargarExpediente = () => {
+    if (expediente || cargando) {
+      return
+    }
 
+    setCargando(true)
+    setError('')
+
+    fetch(`http://localhost:3000/api/alumnos/${estudiante.id}/expediente`)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Error al obtener el expediente')
+        }
+
+        return response.json()
+      })
+      .then((data) => {
+    setExpediente(data)
+
+    const documentosRequeridos = [
+      'F1',
+      'F2',
+      'F3',
+      'F4',
+      'F5',
+      'EV1',
+      'EV2',
+      'EV7',
+    ]
+
+  const estaCompleto = documentosRequeridos.every((clave) => {
+    const documento = data.documentos.find(
+      (doc) => doc.clave === clave
+    )
+
+    return documento?.estado === 'Entregado'
+  })
+
+  setCompleto(estaCompleto)
+})
+      .catch(() => {
+        setError('No se pudo cargar el expediente')
+      })
+      .finally(() => {
+        setCargando(false)
+      })
+  }
+  const cambiarEstadoDocumento = async (documento) => {
+  const nuevoEstado =
+    documento.estado === 'Entregado' ? 'Pendiente' : 'Entregado'
+
+  try {
+    const response = await fetch(
+      `http://localhost:3000/api/alumnos/${estudiante.id}/documentos/${documento.clave}`,
+      {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          estado: nuevoEstado,
+        }),
+      }
+    )
+
+    if (!response.ok) {
+      throw new Error('No se pudo actualizar el documento')
+    }
+
+    const documentosActualizados = expediente.documentos.map((doc) =>
+      doc.clave === documento.clave
+        ? { ...doc, estado: nuevoEstado }
+        : doc
+    )
+
+    setExpediente({
+      ...expediente,
+      documentos: documentosActualizados,
+    })
+
+    const documentosRequeridos = [
+      'F1',
+      'F2',
+      'F3',
+      'F4',
+      'F5',
+      'EV1',
+      'EV2',
+      'EV7',
+    ]
+
+    const estaCompleto = documentosRequeridos.every((clave) => {
+      const doc = documentosActualizados.find(
+        (documento) => documento.clave === clave
+      )
+
+      return doc?.estado === 'Entregado'
+    })
+
+    setCompleto(estaCompleto)
+  } catch (error) {
+    console.error(error)
+  }
+}
+  const alternarTarjeta = () => {
+    const nuevoEstado = !expanded
+
+    setExpanded(nuevoEstado)
+
+    if (nuevoEstado) {
+      cargarExpediente()
+    }
+  }
   return (
     <div className="neumorphic-elevated rounded-xl bg-[#e0e5ec] overflow-hidden transition-all duration-300 border border-outline-variant/5">
       {/* Visible Row Info */}
       <div
         className="p-card-padding flex flex-col md:flex-row justify-between items-center gap-4 cursor-pointer hover:bg-surface-container-low transition-colors"
-        onClick={() => setExpanded((prev) => !prev)}
+        onClick={alternarTarjeta}
       >
         <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-4 w-full">
           <div>
@@ -56,6 +157,21 @@ function TarjetaEstudiante({ estudiante }) {
             <p className="text-body-md font-body-md font-medium text-on-surface">{estudiante.semestre}</p>
           </div>
         </div>
+          <div>
+            <p className="text-label-sm font-label-sm font-semibold text-on-surface-variant mb-1">
+              Estado
+            </p>
+
+            <span
+              className={`px-3 py-1 rounded-full text-label-sm font-label-sm font-semibold ${
+                estudiante.estadoGeneral === 'Completo'
+                  ? 'pill-green'
+                  : 'pill-grey'
+              }`}
+            >
+              {estudiante.estadoGeneral}
+            </span>
+          </div>
         <button
           className="w-10 h-10 rounded-full neumorphic-elevated flex items-center justify-center text-primary bg-[#e0e5ec] shrink-0"
           type="button"
@@ -75,94 +191,104 @@ function TarjetaEstudiante({ estudiante }) {
         }`}
       >
         <div className="p-card-padding">
-          {estudiante.completo ? (
+                    {cargando ? (
+            <p className="text-body-md text-on-surface-variant italic text-center py-4">
+              Cargando información...
+            </p>
+          ) : error ? (
+            <p className="text-body-md text-on-surface-variant italic text-center py-4">
+              {error}
+            </p>
+          ) : expediente ? (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Left Column: Tesis & Formatos */}
               <div className="flex flex-col gap-6">
                 <div className="neumorphic-sunken p-4 rounded-lg bg-[#e0e5ec]">
                   <h4 className="text-label-md font-label-md text-on-surface-variant font-bold mb-2 flex items-center gap-2">
-                    <span className="material-symbols-outlined text-sm">menu_book</span>
+                    <span className="material-symbols-outlined text-sm">
+                      menu_book
+                    </span>
                     Tesis/Anteproyecto
                   </h4>
+
                   <p className="text-body-md font-body-md text-on-surface">
-                    Optimización de Algoritmos Cuánticos para Criptografía Post-Cuántica en Entornos Híbridos...{' '}
-                    <span className="text-primary cursor-pointer hover:underline text-sm font-medium">leer más</span>
+                    {expediente.proyecto
+                      ? expediente.proyecto.nombre
+                      : 'Sin anteproyecto registrado'}
                   </p>
                 </div>
+
                 <div>
                   <h4 className="text-label-md font-label-md text-on-surface-variant font-bold mb-3 flex items-center gap-2">
-                    <span className="material-symbols-outlined text-sm">description</span>
+                    <span className="material-symbols-outlined text-sm">
+                      description
+                    </span>
                     Formatos
                   </h4>
+
                   <div className="flex flex-wrap gap-3">
-                    <span className="px-3 py-1 rounded-full text-label-sm font-label-sm font-semibold pill-green">
-                      F1: Aprobado
-                    </span>
-                    <span className="px-3 py-1 rounded-full text-label-sm font-label-sm font-semibold pill-green">
-                      F2: Entregado
-                    </span>
-                    <span className="px-3 py-1 rounded-full text-label-sm font-label-sm font-semibold pill-amber">
-                      F3: Revisión
-                    </span>
-                    <span className="px-3 py-1 rounded-full text-label-sm font-label-sm font-semibold pill-grey">
-                      F4: Pendiente
-                    </span>
-                    <span className="px-3 py-1 rounded-full text-label-sm font-label-sm font-semibold pill-grey">
-                      F5: N/A
-                    </span>
+                    {expediente.documentos
+                      .filter((documento) =>
+                        documento.clave.startsWith('F')
+                      )
+                      .map((documento) => (
+                        <button
+                          key={documento.clave}
+                          type="button"
+                          onClick={() => cambiarEstadoDocumento(documento)}
+                          className={`px-3 py-1 rounded-full text-label-sm font-label-sm font-semibold cursor-pointer transition-all ${
+                            documento.estado === 'Entregado'
+                              ? 'pill-green'
+                              : 'pill-grey'
+                          }`}
+                        >
+                          {documento.clave}: {documento.estado}
+                        </button>
+                      ))}
                   </div>
                 </div>
               </div>
+
               {/* Right Column: Evaluaciones */}
               <div>
                 <h4 className="text-label-md font-label-md text-on-surface-variant font-bold mb-3 flex items-center gap-2">
-                  <span className="material-symbols-outlined text-sm">fact_check</span>
-                  Evaluaciones
+                  <span className="material-symbols-outlined text-sm">
+                    fact_check
+                  </span>
+                  Estancias
                 </h4>
+
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  <div className="neumorphic-elevated p-3 rounded-lg bg-[#e0e5ec] flex flex-col items-center justify-center text-center">
-                    <span className="text-label-sm font-label-sm font-semibold text-on-surface-variant mb-1">EV1</span>
-                    <span className="px-2 py-0.5 rounded text-xs pill-green w-full">Completada</span>
-                  </div>
-                  <div className="neumorphic-elevated p-3 rounded-lg bg-[#e0e5ec] flex flex-col items-center justify-center text-center">
-                    <span className="text-label-sm font-label-sm font-semibold text-on-surface-variant mb-1">EV2</span>
-                    <span className="px-2 py-0.5 rounded text-xs pill-green w-full">Completada</span>
-                  </div>
-                  <div className="neumorphic-elevated p-3 rounded-lg bg-[#e0e5ec] flex flex-col items-center justify-center text-center">
-                    <span className="text-label-sm font-label-sm font-semibold text-on-surface-variant mb-1">EV3</span>
-                    <span className="px-2 py-0.5 rounded text-xs pill-amber w-full">En Curso</span>
-                  </div>
-                  <div className="neumorphic-sunken p-3 rounded-lg bg-[#e0e5ec] flex flex-col items-center justify-center text-center">
-                    <span className="text-label-sm font-label-sm font-semibold text-outline mb-1">EV4</span>
-                    <span className="px-2 py-0.5 rounded text-xs pill-grey w-full">Bloqueada</span>
-                  </div>
-                  <div className="neumorphic-sunken p-3 rounded-lg bg-[#e0e5ec] flex flex-col items-center justify-center text-center">
-                    <span className="text-label-sm font-label-sm font-semibold text-outline mb-1">EV5</span>
-                    <span className="px-2 py-0.5 rounded text-xs pill-grey w-full">Bloqueada</span>
-                  </div>
-                  <div className="neumorphic-sunken p-3 rounded-lg bg-[#e0e5ec] flex flex-col items-center justify-center text-center">
-                    <span className="text-label-sm font-label-sm font-semibold text-outline mb-1">EV6</span>
-                    <span className="px-2 py-0.5 rounded text-xs pill-grey w-full">Bloqueada</span>
-                  </div>
+                  {expediente.documentos
+                    .filter((documento) =>
+                      documento.clave.startsWith('EV')
+                    )
+                    .map((documento) => (
+                      <div
+                        key={documento.clave}
+                        className="neumorphic-elevated p-3 rounded-lg bg-[#e0e5ec] flex flex-col items-center justify-center text-center"
+                      >
+                        <span className="text-label-sm font-label-sm font-semibold text-on-surface-variant mb-1">
+                          {documento.clave}
+                        </span>
+
+                        <button
+                          type="button"
+                          onClick={() => cambiarEstadoDocumento(documento)}
+                          className={`px-2 py-0.5 rounded text-xs w-full cursor-pointer transition-all ${
+                            documento.estado === 'Entregado'
+                              ? 'pill-green'
+                              : 'pill-grey'
+                          }`}
+                        >
+                          {documento.estado}
+                        </button>
+                      </div>
+                    ))}
                 </div>
               </div>
             </div>
-          ) : (
-            // Minimal content for inactive state demo
-            <p className="text-body-md text-on-surface-variant italic text-center py-4">
-              Información en proceso de registro...
-            </p>
-          )}
-          {estudiante.completo && (
-            <div className="mt-6 flex justify-end">
-              <button
-                className="neumorphic-elevated neumorphic-button bg-[#e0e5ec] text-primary px-4 py-2 rounded-lg text-label-md font-label-md font-medium hover:text-primary-fixed-dim transition-colors"
-                type="button"
-              >
-                Ver Expediente Completo
-              </button>
-            </div>
-          )}
+          ) : null}
         </div>
       </div>
     </div>
@@ -173,7 +299,34 @@ export default function ListaAlumnos() {
   const { clave } = useParams()
   const claveNormalizada = (clave ?? '').toUpperCase()
   const nombrePrograma = NOMBRE_PROGRAMA[claveNormalizada] ?? claveNormalizada
+    const [estudiantes, setEstudiantes] = useState([])
+  const [error, setError] = useState('')
 
+  useEffect(() => {
+    fetch(`http://localhost:3000/api/programas/${claveNormalizada}/alumnos`)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Error al obtener los alumnos')
+        }
+
+        return response.json()
+      })
+      .then((data) => {
+        const estudiantesAdaptados = data.map((alumno) => ({
+          id: alumno.id,
+          matricula: alumno.matricula,
+          nombre: `${alumno.nombre} ${alumno.apellido_paterno} ${alumno.apellido_materno}`,
+          iniciales: `${alumno.nombre[0]}${alumno.apellido_paterno[0]}`,
+          semestre: `${alumno.semestre}° Semestre`,
+          estadoGeneral: alumno.estado_general,
+        }))
+
+        setEstudiantes(estudiantesAdaptados)
+      })
+      .catch(() => {
+        setError('No se pudieron cargar los alumnos')
+      })
+  }, [claveNormalizada])
   return (
     <AppLayout>
       <div className="max-w-7xl mx-auto flex flex-col gap-element-gap">
@@ -207,7 +360,7 @@ export default function ListaAlumnos() {
         </div>
         {/* Main List: Expandable Student Cards */}
         <div className="flex flex-col gap-element-gap">
-          {ESTUDIANTES.map((estudiante) => (
+          {estudiantes.map((estudiante) => (
             <TarjetaEstudiante key={estudiante.matricula} estudiante={estudiante} />
           ))}
         </div>

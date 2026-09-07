@@ -1,35 +1,8 @@
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AppLayout from '../components/AppLayout.jsx'
 
-const PROGRAMAS = [
-  {
-    clave: 'DCC',
-    nombre: 'Doctorado en Ciencias de la Computación',
-    alumnosInscritos: 42,
-  },
-  {
-    clave: 'DGTI',
-    nombre: 'Doctorado en Gestión de Tecnologías de la Información',
-    alumnosInscritos: 28,
-  },
-  {
-    clave: 'MCC',
-    nombre: 'Maestría en Ciencias de la Computación',
-    alumnosInscritos: 56,
-  },
-  {
-    clave: 'MTAC',
-    nombre: 'Maestría en Tecnologías para el Aprendizaje y el Conocimiento',
-    alumnosInscritos: 34,
-    centered: true,
-  },
-  {
-    clave: 'MATI',
-    nombre: 'Maestría en Administración de Tecnologías de la Información',
-    alumnosInscritos: 89,
-    centered: true,
-  },
-]
+
 
 function ProgramaCard({ programa }) {
   const navigate = useNavigate()
@@ -59,9 +32,35 @@ function ProgramaCard({ programa }) {
 }
 
 export default function SelectorPrograma() {
-  const gridCards = PROGRAMAS.filter((programa) => !programa.centered)
-  const centeredCards = PROGRAMAS.filter((programa) => programa.centered)
+  const [programas, setProgramas] = useState([])
+  const [error, setError] = useState('')
 
+  useEffect(() => {
+    fetch('http://localhost:3000/api/programas')
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Error al obtener los programas')
+        }
+
+        return response.json()
+      })
+      .then((data) => {
+        const programasAdaptados = data.map((programa) => ({
+          clave: programa.clave,
+          nombre: programa.nombre,
+          alumnosInscritos: programa.total_alumnos,
+          centered: programa.clave === 'MTAC' || programa.clave === 'MATI',
+        }))
+
+        setProgramas(programasAdaptados)
+      })
+      .catch(() => {
+        setError('No se pudieron cargar los programas')
+      })
+  }, [])
+
+  const gridCards = programas.filter((programa) => !programa.centered)
+  const centeredCards = programas.filter((programa) => programa.centered)
   return (
     <AppLayout>
       <div className="max-w-[1440px] mx-auto min-h-full flex flex-col gap-12">
